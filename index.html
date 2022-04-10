@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta | IvanLeonC</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <script src="js/Winwheel.min.js"></script>
+    <script src="js/TweenMax.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <script src="js/sweetalert.min.js"></script>
+    <link href="css/sweetalert.css" rel="stylesheet" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <style>
+            #canvasContainer{
+            background-image: url(img/pareja.png);
+            background-repeat: no-repeat;  
+            background-position: center;   
+            width: 700px;                  
+            height: 700px;
+			cursor:pointer;
+            }
+        </style>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-3 text-center">
+                    <h1>La Ruleta</h1>
+                    <br>
+                    <a href="http://github.com/ivanleonc" rel="Hola Ivan">
+                    <img width="130px" src="img/minovia1.jpg" alt="Mi amor">
+                </a>
+                <section>
+                    <p>by. <a href="https://github.com/ivanleonc">IvanLeonC</a></p>
+                </section>
+                <div class="card bg-warning">
+                    <div class="card-body">
+                        <h4 class="card-title">Lista de elementos: </h4>
+                        <textarea id="ListaElementos" class="form-control" cols="25" rows="10">
+Ingresa dato
+Ingresa dato
+                        </textarea>
+                        <br>
+                        <input type="button" onclick="leerElementos()" class="btn btn-danger btn-lg btn-block" value="Generar ruleta">
+
+                    </div>
+                </div>
+                
+                </div>
+                
+                <div class="col-8 text center">
+                    <br>
+                    <input id="bigButton" class="btn-block btn-lg btn btn-success" onclick="objRuleta.startAnimation();
+                    this.disable=true;" value="Girar Ruleta" type="button">
+                    <div id="canvasContainer"
+                    onclick="objRuleta.startAnimation();
+                    bigButton.disabled = true;">
+                    <canvas id="Ruleta" width="700" height="690">
+                        Canvas no soporta este navegador, porfavor ingrese desde otro.
+                    </canvas>
+
+                    </div>
+                </div>
+                
+            </div>
+
+        </div>
+        <script>
+            var objRuleta;
+            var winningSegment;
+            var distanciaX = 150;
+            var distanciaY = 50;
+            var ctx;
+            function Mensaje(){
+                winningSegment = objRuleta.getIndicatedSegment();
+                SonidoFinal();
+                swal({
+                    title: "¡"+winningSegment.text+"!",
+                    imageUrl: "img/minovia2.jpg",
+                    showCancelButton: true,
+                    confirmButtonColor: "#e74c3c",
+                    confirmButtonText: "Ok,Reiniciar",
+                    cancelButtonText: "Quitar elemento",
+                    closeOnConfirm: true,
+                    closeOnCancel: true
+                },
+                function (isConfirm){
+                    if (isConfirm){
+
+                    }else{
+                        $('#ListaElementos').val($('#ListaElementos').val().replace(winningSegment.text,""));
+                        leerElementos(); 
+                    }
+                    objRuleta.stopAnimation(false);
+                    objRuleta.rotationAngle = 0;
+                    objRuleta.draw();
+                    DibujarTriangulo();
+                    bigButton.disabled = false;
+                });
+            }
+            function DibujarTriangulo() {
+             distnaciaX = 150;
+             distnaciaY = 50;
+             ctx = objRuleta.ctx;
+             ctx.strokeStyle = 'navy';
+             ctx.fillStyle = '#000000';
+             ctx.lineWidth = 2;
+             ctx.beginPath();
+             ctx.moveTo(distnaciaX + 170, distnaciaY + 5);
+             ctx.lineTo(distnaciaX + 230, distnaciaY + 5);
+             ctx.lineTo(distnaciaX + 200, distnaciaY + 40);
+             ctx.lineTo(distnaciaX + 171, distnaciaY + 5);
+             ctx.stroke();
+             ctx.fill();
+         }
+         function DibujarRuleta(ArregloElementos) {
+             
+             objRuleta = new Winwheel({
+               'canvasId': 'Ruleta',
+               'numSegments': ArregloElementos.length,
+               'outerRadius': 270,
+               'innerRadius': 80,
+               'segments':ArregloElementos,
+               'animation':
+               {
+                   'type': 'spinToStop',
+                   'duration':4,
+                   'spins': 15,
+                   'callbackFinished': 'Mensaje()',
+                   'callbackAfter': 'DibujarTriangulo()' 
+                   
+               }, 
+              
+           });
+  
+             DibujarTriangulo();
+    }
+    function leerElementos() {
+                  txtListaElementos=$('#ListaElementos').val().trim();
+                  var Elementos = txtListaElementos.split('\n');
+                  var ElementosRuleta= [];
+	          Elementos.forEach(function (Elemento) {
+                      if(Elemento){
+                      ElementosRuleta.push({ 'fillStyle': "#" + ((1 << 24) * Math.random() | 0).toString(16), 'text': Elemento });
+                  }
+                  });
+                  DibujarRuleta(ElementosRuleta);
+	     } 
+         leerElementos();
+		  var audio = new Audio('sound/sound.mp3');
+		function SonidoFinal()
+			{
+				audio.pause();
+				audio.currentTime = 0;
+				audio.play();
+			}
+        </script>
+    </div>
+</form>
+</body>
+</html>
